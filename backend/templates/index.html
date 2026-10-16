@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Air Reservation System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <header>
+        <h1>SkyBook</h1>
+        <p>Your journey begins here.</p>
+    </header>
+
+    <main>
+        <h2>Welcome to SkyBook</h2>
+        <p>Discover your next destination and plan your journey with us.</p>
+
+        <section>
+            <h3>Search for Flights</h3>
+
+            <form id="flightForm">
+                <label for="from">From:</label>
+                <input type="text" id="from" placeholder="Departure city">
+
+                <label for="to">To:</label>
+                <input type="text" id="to" placeholder="Destination city">
+
+                <label for="date">Departure date:</label>
+                <input type="date" id="date">
+
+                <button type="submit">Search Flights</button>
+                <p id="message"></p>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 SkyBook. All rights reserved.</p>
+    </footer>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
