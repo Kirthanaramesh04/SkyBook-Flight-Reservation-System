@@ -110,13 +110,17 @@ Replace the placeholder with your own connection string. **Never commit your `.e
 
 ### 5. Run the Application
 
+Start the Flask application locally:
+
 ```bash
 python backend/app.py
 ```
 
-Open the application in your browser:
+Once the server starts, open `http://127.0.0.1:5000` in your browser.
 
-[http://127.0.0.1:5000](http://127.0.0.1:5000)
+**Note:** This address works only on your local computer while the Flask server is running.
+
+To try the deployed application without installing anything, visit the [SkyBook Live Demo](https://skybook-t264.onrender.com/).
 
 ## Database Design
 
