@@ -42,6 +42,14 @@ This project demonstrates full-stack web development, API development, database 
 
 ```text
 Air-Reservation-System/
+├── Sample-Outputs/
+│   └── mongodb-sample-output.txt
+├── Screenshots/
+│   ├── available-flights.png
+│   ├── booking-form.png
+│   ├── flight-search-results.png
+│   ├── home-page.png
+│   └── my-bookings.png
 ├── backend/
 │   ├── app.py
 │   ├── templates/
@@ -51,8 +59,7 @@ Air-Reservation-System/
 │       └── script.js
 ├── .gitignore
 ├── README.md
-├── requirements.txt
-└── Output in MongoDB.json
+└── requirements.txt
 ```
 
 ## Installation and Setup
@@ -141,11 +148,24 @@ Booking and cancellation operations update seat availability to maintain consist
 
 ## Screenshots
 
-Screenshots of the SkyBook interface are available in the [Screenshots](https://github.com/Kirthanaramesh04/Air-Reservation-System/tree/main/Screenshots) folder.
+### Home Page
+![SkyBook Home Page](Screenshots/home-page.png)
+
+### Flight Search Results
+![Flight Search Results](Screenshots/flight-search-results.png)
+
+### Available Flights
+![Available Flights](Screenshots/available-flights.png)
+
+### Booking Form
+![Booking Form](Screenshots/booking-form.png)
+
+### My Bookings
+![My Bookings](Screenshots/my-bookings.png)
 
 ## Sample MongoDB Outputs
 
-Sample booking records demonstrating flight details, booking status, and simulated payment status are available in the [Sample-Outputs](https://github.com/Kirthanaramesh04/Air-Reservation-System/tree/main/Sample-Outputs) folder. Personal information has been omitted from the public samples.
+Sample booking records demonstrating flight details, booking status, and simulated payment status are available in the [Sample-Outputs](Sample-Outputs/) folder. Personal information has been omitted from the public samples.
 
 ## Testing and Validation
 
