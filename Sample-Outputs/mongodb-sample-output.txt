@@ -1,0 +1,47 @@
+# SkyBook — Sample MongoDB Booking Outputs
+
+These sample records demonstrate how SkyBook stores flight reservation details, passenger information fields, booking status, and demo payment status in MongoDB.
+
+## Sample Booking 1
+
+- Booking Reference: `SKY-7EBEC51F`
+- Flight: `SB101` — SkyBook Airways
+- Route: Chennai → Bengaluru
+- Travel Date: 2026-11-01
+- Departure: 08:00
+- Arrival: 09:00
+- Seats: 1
+- Price per Seat: ₹3,500
+- Total Price: ₹3,500
+- Booking Status: CONFIRMED
+- Payment Status: NOT_PAID
+
+## Sample Booking 2
+
+- Booking Reference: `SKY-0ABC7374`
+- Flight: `DA202` — Demo Airlines
+- Route: Chennai → Bengaluru
+- Travel Date: 2026-11-01
+- Departure: 11:30
+- Arrival: 12:35
+- Seats: 1
+- Price per Seat: ₹4,200
+- Total Price: ₹4,200
+- Booking Status: CONFIRMED
+- Payment Status: DEMO_PAID
+
+## Sample Booking 3
+
+- Booking Reference: `SKY-45D918A5`
+- Flight: `SB102` — SkyBook Airways
+- Route: Bengaluru → Chennai
+- Travel Date: 2026-11-01
+- Departure: 14:00
+- Arrival: 15:00
+- Seats: 1
+- Price per Seat: ₹3,800
+- Total Price: ₹3,800
+- Booking Status: CONFIRMED
+- Payment Status: DEMO_PAID
+
+**Note:** Passenger names, email addresses, phone numbers, and database-specific identifiers have been omitted from this public sample. Payment is simulated for demonstration purposes; no real payment was processed.
