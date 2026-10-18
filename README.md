@@ -141,11 +141,11 @@ Booking and cancellation operations update seat availability to maintain consist
 
 ## Screenshots
 
-Screenshots of the SkyBook interface are available in the [Screenshots](Screenshots/) folder.
+Screenshots of the SkyBook interface are available in the [Screenshots](https://github.com/Kirthanaramesh04/Air-Reservation-System/tree/main/Screenshots) folder.
 
 ## Sample MongoDB Outputs
 
-Sample booking records demonstrating flight details, booking status, and simulated payment status are available in the [Sample-Outputs](Sample-Outputs/) folder. Personal information has been omitted from the public samples.
+Sample booking records demonstrating flight details, booking status, and simulated payment status are available in the [Sample-Outputs](https://github.com/Kirthanaramesh04/Air-Reservation-System/tree/main/Sample-Outputs) folder. Personal information has been omitted from the public samples.
 
 ## Testing and Validation
 
