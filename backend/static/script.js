@@ -12,255 +12,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const fromInput = document.getElementById("from");
     const toInput = document.getElementById("to");
     const dateInput = document.getElementById("date");
-    
-      // ------------------------------------
-    // DYNAMIC FLIGHT SEARCH DROPDOWNS
-    // ------------------------------------
-
-    function resetDropdown(dropdown, placeholder) {
-        dropdown.replaceChildren();
-
-        const option = document.createElement("option");
-        option.value = "";
-        option.textContent = placeholder;
-
-        dropdown.appendChild(option);
-        dropdown.value = "";
-    }
-
-    function populateDropdown(dropdown, values, placeholder) {
-        resetDropdown(dropdown, placeholder);
-
-        values.forEach(function (value) {
-            const option = document.createElement("option");
-            option.value = value;
-            option.textContent = value;
-            dropdown.appendChild(option);
-        });
-
-        dropdown.disabled = values.length === 0;
-    }
-
-    async function fetchFlightOptions(from = "", to = "") {
-        const params = new URLSearchParams();
-
-        if (from) {
-            params.set("from", from);
-        }
-
-        if (to) {
-            params.set("to", to);
-        }
-
-        const query = params.toString();
-        const url = query
-            ? `/flight-options?${query}`
-            : "/flight-options";
-
-        const response = await fetch(url);
-        const result = await response.json();
-
-        if (!response.ok || result.status !== "success") {
-            throw new Error(
-                result.message || "Unable to load flight options."
-            );
-        }
-
-        return result;
-    }
-
-    // Load departure cities when the page opens.
-    async function loadDepartureCities() {
-        fromInput.disabled = true;
-        toInput.disabled = true;
-        dateInput.disabled = true;
-
-        resetDropdown(fromInput, "Loading departure cities...");
-        resetDropdown(toInput, "Select departure city first");
-        resetDropdown(dateInput, "Select route first");
-
-        try {
-            const result = await fetchFlightOptions();
-
-            populateDropdown(
-                fromInput,
-                result.departure_cities || [],
-                "Select departure city"
-            );
-
-            showMessage(message, "");
-
-        } catch (error) {
-            console.error("Departure city loading error:", error);
-
-            resetDropdown(fromInput, "Could not load cities");
-            fromInput.disabled = true;
-
-            showMessage(
-                message,
-                "Unable to load flight options. Please refresh the page."
-            );
-        }
-    }
-
-    // Load destinations for the selected departure city.
-    fromInput.addEventListener("change", async function () {
-        const from = fromInput.value;
-
-        resetDropdown(toInput, "Loading destinations...");
-        toInput.disabled = true;
-
-        resetDropdown(dateInput, "Select route first");
-        dateInput.disabled = true;
-
-        availableFlights = [];
-        selectedFlight = null;
-        resultsContainer.replaceChildren();
-
-        flightCount.textContent =
-            "Choose a route and date to search for flights.";
-
-        bookingFormSection.hidden = true;
-        showMessage(message, "");
-
-        if (!from) {
-            resetDropdown(toInput, "Select departure city first");
-            return;
-        }
-
-        try {
-            const result = await fetchFlightOptions(from);
-
-            // IMPORTANT: Use destinations for this departure city.
-            populateDropdown(
-                toInput,
-                result.available_destinations || [],
-                "Select destination city"
-            );
-
-            if (!result.available_destinations?.length) {
-                resetDropdown(
-                    toInput,
-                    "No destinations available"
-                );
-            }
-
-        } catch (error) {
-            console.error("Destination loading error:", error);
-
-            resetDropdown(toInput, "Could not load destinations");
-            toInput.disabled = true;
-
-            showMessage(
-                message,
-                "Unable to load destinations. Please try again."
-            );
-        }
-    });
-
-    // Load travel dates for the selected route.
-    toInput.addEventListener("change", async function () {
-        const from = fromInput.value;
-        const to = toInput.value;
-
-        resetDropdown(dateInput, "Loading travel dates...");
-        dateInput.disabled = true;
-
-        availableFlights = [];
-        selectedFlight = null;
-        resultsContainer.replaceChildren();
-
-        flightCount.textContent =
-            "Choose a travel date to search for flights.";
-
-        bookingFormSection.hidden = true;
-        showMessage(message, "");
-
-        if (!from || !to) {
-            resetDropdown(dateInput, "Select route first");
-            return;
-        }
-
-        try {
-            const result = await fetchFlightOptions(from, to);
-
-            populateDropdown(
-                dateInput,
-                result.travel_dates || [],
-                "Select travel date"
-            );
-
-            if (!result.travel_dates?.length) {
-                resetDropdown(
-                    dateInput,
-                    "No travel dates available"
-                );
-            }
-
-        } catch (error) {
-            console.error("Travel date loading error:", error);
-
-            resetDropdown(dateInput, "Could not load dates");
-            dateInput.disabled = true;
-
-            showMessage(
-                message,
-                "Unable to load travel dates. Please try again."
-            );
-        }
-    });
-
-    // Start loading the dropdowns.
-    loadDepartureCities();
-
-    // When a destination is selected, load dates for that route.
-    toInput.addEventListener("change", async function () {
-        const from = fromInput.value;
-        const to = toInput.value;
-
-        resetDropdown(dateInput, "Loading travel dates...");
-        dateInput.disabled = true;
-
-        availableFlights = [];
-        selectedFlight = null;
-        resultsContainer.replaceChildren();
-        flightCount.textContent =
-            "Choose a travel date to search for flights.";
-        bookingFormSection.hidden = true;
-        showMessage(message, "");
-
-        if (!from || !to) {
-            resetDropdown(dateInput, "Select route first");
-            return;
-        }
-
-        try {
-            const result = await fetchFlightOptions(from, to);
-            console.log("Selected route:", from, "to", to);
-            console.log("Travel dates received:", result.travel_dates);
-
-            populateDropdown(
-                dateInput,
-                result.travel_dates || [],
-                "Select travel date"
-            );
-
-        } catch (error) {
-            console.error("Travel date loading error:", error);
-
-            resetDropdown(dateInput, "Could not load dates");
-            dateInput.disabled = true;
-
-            showMessage(
-                message,
-                "Unable to load travel dates. Please try again."
-            );
-        }
-    });
-
-    // Start loading the dropdowns.
-    loadDepartureCities();
-
 
     const lookupBookingForm =
         document.getElementById("lookupBookingForm");
@@ -311,6 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function formatPrice(amount) {
         const number = Number(amount);
+
         return (Number.isFinite(number) ? number : 0)
             .toLocaleString("en-IN", {
                 maximumFractionDigits: 2
@@ -344,7 +96,209 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ------------------------------------
-    // 4. PRINTABLE DEMO TICKET STYLES
+    // 4. DYNAMIC FLIGHT SEARCH DROPDOWNS
+    // ------------------------------------
+
+    function resetDropdown(dropdown, placeholder) {
+        dropdown.replaceChildren();
+
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = placeholder;
+
+        dropdown.appendChild(option);
+        dropdown.value = "";
+    }
+
+    function populateDropdown(dropdown, values, placeholder) {
+        resetDropdown(dropdown, placeholder);
+
+        values.forEach(function (value) {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = value;
+            dropdown.appendChild(option);
+        });
+
+        dropdown.disabled = values.length === 0;
+    }
+
+    async function fetchFlightOptions(from = "", to = "") {
+        const params = new URLSearchParams();
+
+        if (from) {
+            params.set("from", from);
+        }
+
+        if (to) {
+            params.set("to", to);
+        }
+
+        const query = params.toString();
+
+        const url = query
+            ? `/flight-options?${query}`
+            : "/flight-options";
+
+        const response = await fetch(url);
+        const result = await response.json();
+
+        if (!response.ok || result.status !== "success") {
+            throw new Error(
+                result.message || "Unable to load flight options."
+            );
+        }
+
+        return result;
+    }
+
+    // Load departure cities when the page opens.
+    async function loadDepartureCities() {
+        fromInput.disabled = true;
+        toInput.disabled = true;
+        dateInput.disabled = true;
+
+        resetDropdown(fromInput, "Loading departure cities...");
+        resetDropdown(toInput, "Select departure city first");
+        resetDropdown(dateInput, "Select route first");
+
+        try {
+            const result = await fetchFlightOptions();
+
+            populateDropdown(
+                fromInput,
+                result.departure_cities || [],
+                "Select departure city"
+            );
+
+            showMessage(message, "");
+
+        } catch (error) {
+            console.error("Departure city loading error:", error);
+
+            resetDropdown(fromInput, "Could not load cities");
+            fromInput.disabled = true;
+
+            showMessage(
+                message,
+                "Unable to load flight options. Please refresh the page."
+            );
+        }
+    }
+
+    // Load destinations when departure city changes.
+    fromInput.addEventListener("change", async function () {
+        const from = fromInput.value;
+
+        resetDropdown(toInput, "Loading destinations...");
+        toInput.disabled = true;
+
+        resetDropdown(dateInput, "Select route first");
+        dateInput.disabled = true;
+
+        availableFlights = [];
+        selectedFlight = null;
+
+        resultsContainer.replaceChildren();
+
+        flightCount.textContent =
+            "Choose a route and date to search for flights.";
+
+        bookingFormSection.hidden = true;
+        showMessage(message, "");
+
+        if (!from) {
+            resetDropdown(toInput, "Select departure city first");
+            return;
+        }
+
+        try {
+            const result = await fetchFlightOptions(from);
+
+            populateDropdown(
+                toInput,
+                result.available_destinations || [],
+                "Select destination city"
+            );
+
+            if (!result.available_destinations?.length) {
+                resetDropdown(
+                    toInput,
+                    "No destinations available"
+                );
+            }
+
+        } catch (error) {
+            console.error("Destination loading error:", error);
+
+            resetDropdown(toInput, "Could not load destinations");
+            toInput.disabled = true;
+
+            showMessage(
+                message,
+                "Unable to load destinations. Please try again."
+            );
+        }
+    });
+
+    // Load travel dates when destination changes.
+    toInput.addEventListener("change", async function () {
+        const from = fromInput.value;
+        const to = toInput.value;
+
+        resetDropdown(dateInput, "Loading travel dates...");
+        dateInput.disabled = true;
+
+        availableFlights = [];
+        selectedFlight = null;
+
+        resultsContainer.replaceChildren();
+
+        flightCount.textContent =
+            "Choose a travel date to search for flights.";
+
+        bookingFormSection.hidden = true;
+        showMessage(message, "");
+
+        if (!from || !to) {
+            resetDropdown(dateInput, "Select route first");
+            return;
+        }
+
+        try {
+            const result = await fetchFlightOptions(from, to);
+
+            populateDropdown(
+                dateInput,
+                result.travel_dates || [],
+                "Select travel date"
+            );
+
+            if (!result.travel_dates?.length) {
+                resetDropdown(
+                    dateInput,
+                    "No travel dates available"
+                );
+            }
+
+        } catch (error) {
+            console.error("Travel date loading error:", error);
+
+            resetDropdown(dateInput, "Could not load dates");
+            dateInput.disabled = true;
+
+            showMessage(
+                message,
+                "Unable to load travel dates. Please try again."
+            );
+        }
+    });
+
+    // Start loading departure cities once.
+    loadDepartureCities();
+
+    // ------------------------------------
+    // 5. PRINTABLE DEMO TICKET STYLES
     // ------------------------------------
 
     function addTicketPrintStyles() {
@@ -396,6 +350,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 color: #166534;
                 font-weight: bold;
                 font-size: 12px;
+            }
+
+            .skybook-ticket-status.cancelled {
+                background: #fee2e2;
+                color: #991b1b;
             }
 
             .skybook-ticket-route {
@@ -516,6 +475,7 @@ document.addEventListener("DOMContentLoaded", function () {
         );
 
         field.appendChild(createElement("span", label));
+
         field.appendChild(
             createElement(
                 "strong",
@@ -533,7 +493,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ------------------------------------
-    // 5. CREATE PRINTABLE TICKET
+    // 6. CREATE PRINTABLE TICKET
     // ------------------------------------
 
     function createPrintableTicket(booking) {
@@ -554,7 +514,9 @@ document.addEventListener("DOMContentLoaded", function () {
         );
 
         const brandBlock = document.createElement("div");
+
         brandBlock.appendChild(createElement("h2", "SkyBook"));
+
         brandBlock.appendChild(
             createElement(
                 "p",
@@ -569,6 +531,10 @@ document.addEventListener("DOMContentLoaded", function () {
             "skybook-ticket-status"
         );
 
+        if (booking.booking_status === "CANCELLED") {
+            status.classList.add("cancelled");
+        }
+
         header.append(brandBlock, status);
 
         const route = createElement(
@@ -578,9 +544,11 @@ document.addEventListener("DOMContentLoaded", function () {
         );
 
         const sourceBlock = document.createElement("div");
+
         sourceBlock.appendChild(
             createElement("strong", booking.source || "N/A")
         );
+
         sourceBlock.appendChild(createElement("small", "FROM"));
 
         const routeMiddle = createElement(
@@ -590,9 +558,11 @@ document.addEventListener("DOMContentLoaded", function () {
         );
 
         const destinationBlock = document.createElement("div");
+
         destinationBlock.appendChild(
             createElement("strong", booking.destination || "N/A")
         );
+
         destinationBlock.appendChild(createElement("small", "TO"));
 
         route.append(sourceBlock, routeMiddle, destinationBlock);
@@ -630,14 +600,23 @@ document.addEventListener("DOMContentLoaded", function () {
         );
 
         total.appendChild(createElement("span", "Total Price"));
+
         total.appendChild(
             createElement("span", `₹${formatPrice(booking.total_price)}`)
         );
 
-        const noteText =
-            booking.payment_status === "DEMO_PAID"
-                ? "DEMO TICKET ONLY — Demo payment was simulated. No real money was charged. This is not a real airline ticket."
-                : "DEMO TICKET ONLY — This is a portfolio demonstration. It is not a real airline ticket and no payment has been collected.";
+        let noteText;
+
+        if (booking.booking_status === "CANCELLED") {
+            noteText =
+                "CANCELLED BOOKING — This demo booking has been cancelled. It is not a valid airline ticket.";
+        } else if (booking.payment_status === "DEMO_PAID") {
+            noteText =
+                "DEMO TICKET ONLY — Demo payment was simulated. No real money was charged. This is not a real airline ticket.";
+        } else {
+            noteText =
+                "DEMO TICKET ONLY — This is a portfolio demonstration. It is not a real airline ticket and no payment has been collected.";
+        }
 
         const note = createElement(
             "p",
@@ -660,11 +639,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 document.body.classList.remove(
                     "skybook-printing-ticket"
                 );
+
                 window.removeEventListener("afterprint", cleanup);
             };
 
             window.addEventListener("afterprint", cleanup);
+
             window.print();
+
             window.setTimeout(cleanup, 1500);
         });
 
@@ -681,10 +663,14 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ------------------------------------
-    // 6. DEMO PAYMENT INTERFACE
+    // 7. DEMO PAYMENT INTERFACE
     // ------------------------------------
 
-    function createDemoPaymentSection(booking, passengerEmail, onPaymentComplete) {
+    function createDemoPaymentSection(
+        booking,
+        passengerEmail,
+        onPaymentComplete
+    ) {
         const section = createElement(
             "section",
             null,
@@ -713,8 +699,10 @@ document.addEventListener("DOMContentLoaded", function () {
         section.appendChild(status);
 
         const paymentMessage = createElement("p", "");
+
         paymentMessage.setAttribute("role", "status");
         paymentMessage.setAttribute("aria-live", "polite");
+
         section.appendChild(paymentMessage);
 
         if (booking.payment_status === "DEMO_PAID") {
@@ -784,6 +772,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         result.message ||
                             "Demo payment could not be completed."
                     );
+
                     return;
                 }
 
@@ -825,7 +814,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ------------------------------------
-    // 7. SORT FLIGHTS
+    // 8. SORT FLIGHTS
     // ------------------------------------
 
     function getSortedFlights() {
@@ -874,7 +863,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ------------------------------------
-    // 8. DISPLAY FLIGHT RESULTS
+    // 9. DISPLAY FLIGHT RESULTS
     // ------------------------------------
 
     function displayFlights() {
@@ -932,6 +921,7 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
             const bookButton = createElement("button", "Book Flight");
+
             bookButton.type = "button";
 
             bookButton.addEventListener("click", function () {
@@ -957,7 +947,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ------------------------------------
-    // 9. SEARCH FLIGHTS
+    // 10. SEARCH FLIGHTS
     // ------------------------------------
 
     if (flightForm) {
@@ -982,6 +972,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     message,
                     "Please fill in all flight search fields."
                 );
+
                 return;
             }
 
@@ -990,6 +981,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     message,
                     "Departure and destination must be different."
                 );
+
                 return;
             }
 
@@ -1061,7 +1053,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ------------------------------------
-    // 10. OPEN THE BOOKING FORM
+    // 11. OPEN THE BOOKING FORM
     // ------------------------------------
 
     function openBookingForm(flight) {
@@ -1169,6 +1161,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             const total = Number(flight.price) * seats;
+
             const passengerWord =
                 seats === 1 ? "passenger" : "passengers";
 
@@ -1212,7 +1205,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ------------------------------------
-    // 11. SUBMIT A BOOKING
+    // 12. SUBMIT A BOOKING
     // ------------------------------------
 
     async function submitBooking(event) {
@@ -1248,6 +1241,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 bookingMessage,
                 "Please fill in all passenger details."
             );
+
             return;
         }
 
@@ -1261,6 +1255,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 bookingMessage,
                 "Please select a valid number of available seats (1–6)."
             );
+
             return;
         }
 
@@ -1289,13 +1284,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     bookingMessage,
                     result.message || "Booking could not be completed."
                 );
+
                 return;
             }
 
             const booking = result.booking;
 
-            // Keep the email locally for the demo-payment request.
-            // The backend should still verify the reference and email.
             booking.passenger_email = passengerEmail;
 
             bookingFormSection.replaceChildren();
@@ -1328,7 +1322,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 ticket
             );
 
-            // Update the displayed seat count after successful booking.
             const flightInResults = availableFlights.find(
                 item =>
                     item.flight_number === booking.flight_number
@@ -1361,7 +1354,140 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ------------------------------------
-    // 12. LOOK UP AN EXISTING BOOKING
+    // 13. CANCEL AN EXISTING BOOKING
+    // ------------------------------------
+
+    function addCancellationButton(
+        booking,
+        passengerEmail,
+        card,
+        paymentSection,
+        paymentStatusParagraph,
+        ticket
+    ) {
+        const cancellationMessage = createElement("p", "");
+
+        cancellationMessage.setAttribute("role", "status");
+        cancellationMessage.setAttribute("aria-live", "polite");
+
+        card.appendChild(cancellationMessage);
+
+        // Only confirmed bookings can be cancelled.
+        if (booking.booking_status !== "CONFIRMED") {
+            return;
+        }
+
+        const cancelButton = createElement(
+            "button",
+            "Cancel Ticket"
+        );
+
+        cancelButton.type = "button";
+
+        cancelButton.addEventListener("click", async function () {
+            const confirmed = window.confirm(
+                "Are you sure you want to cancel this booking? " +
+                "The reserved seats will be returned."
+            );
+
+            if (!confirmed) {
+                return;
+            }
+
+            cancelButton.disabled = true;
+            cancelButton.textContent = "Cancelling...";
+
+            try {
+                const response = await fetch("/cancel-booking", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        booking_reference: booking.booking_reference,
+                        passenger_email: passengerEmail
+                    })
+                });
+
+                const result = await response.json();
+
+                if (
+                    !response.ok ||
+                    result.status !== "success"
+                ) {
+                    showMessage(
+                        cancellationMessage,
+                        result.message ||
+                            "Unable to cancel this booking."
+                    );
+
+                    cancelButton.disabled = false;
+                    cancelButton.textContent = "Cancel Ticket";
+
+                    return;
+                }
+
+                // Update the booking using the backend response.
+                booking.booking_status =
+                    result.booking.booking_status;
+
+                booking.payment_status =
+                    result.booking.payment_status ||
+                    booking.payment_status;
+
+                // Update the booking status on the page.
+                const statusParagraph = Array.from(
+                    card.querySelectorAll("p")
+                ).find(paragraph =>
+                    paragraph.textContent.startsWith("Booking Status:")
+                );
+
+                if (statusParagraph) {
+                    statusParagraph.textContent =
+                        `Booking Status: ${booking.booking_status}`;
+                }
+
+                // Update the payment status.
+                paymentStatusParagraph.textContent =
+                    `Payment Status: ${booking.payment_status}`;
+
+                showMessage(
+                    cancellationMessage,
+                    `${result.message} Seats restored: ` +
+                    `${result.booking.seats_restored}.`
+                );
+
+                // A cancelled booking cannot be paid again.
+                paymentSection.remove();
+
+                // Remove the cancellation button.
+                cancelButton.remove();
+
+                // Refresh the printable ticket.
+                const updatedTicket =
+                    createPrintableTicket(booking);
+
+                ticket.replaceWith(updatedTicket);
+
+            } catch (error) {
+                console.error("Ticket cancellation error:", error);
+
+                showMessage(
+                    cancellationMessage,
+                    "Unable to connect to the server. " +
+                    "Please check the booking status before retrying."
+                );
+
+                cancelButton.disabled = false;
+                cancelButton.textContent = "Cancel Ticket";
+            }
+        });
+
+        card.appendChild(cancelButton);
+    }
+
+    // ------------------------------------
+    // 14. LOOK UP AN EXISTING BOOKING
     // ------------------------------------
 
     if (lookupBookingForm) {
@@ -1389,6 +1515,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         lookupMessage,
                         "Please enter your booking reference and email."
                     );
+
                     return;
                 }
 
@@ -1424,13 +1551,12 @@ document.addEventListener("DOMContentLoaded", function () {
                             result.message ||
                                 "Unable to find your booking."
                         );
+
                         return;
                     }
 
                     const booking = result.booking;
 
-                    // Use the email supplied for this lookup when
-                    // requesting a demo payment.
                     booking.passenger_email = passengerEmail;
 
                     showMessage(
@@ -1517,17 +1643,25 @@ document.addEventListener("DOMContentLoaded", function () {
                         booking,
                         passengerEmail,
                         function (updatedBooking) {
-                            // Refresh the visible payment status.
                             paymentStatusParagraph.textContent =
                                 `Payment Status: ${updatedBooking.payment_status}`;
 
-                            // Refresh the printable ticket too.
                             const updatedTicket =
                                 createPrintableTicket(updatedBooking);
 
                             ticket.replaceWith(updatedTicket);
                             ticket = updatedTicket;
                         }
+                    );
+
+                    // Add cancellation functionality.
+                    addCancellationButton(
+                        booking,
+                        passengerEmail,
+                        card,
+                        paymentSection,
+                        paymentStatusParagraph,
+                        ticket
                     );
 
                     if (bookingDetails) {
