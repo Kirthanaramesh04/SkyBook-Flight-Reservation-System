@@ -32,6 +32,10 @@ db = client["skybook"]
 flights_collection = db["flights"]
 bookings_collection = db["bookings"]
 
+# Demo flight dates shown by SkyBook: November 1-30, 2026.
+DEMO_START_DATE = "2026-11-01"
+DEMO_END_DATE = "2026-12-31"
+
 
 def utc_now():
     return datetime.now(timezone.utc).isoformat()
@@ -106,39 +110,33 @@ def test_db():
 
 @app.route("/flight-options", methods=["GET"])
 def flight_options():
-    """
-    Return cities and travel dates based on the flights
-    currently available in MongoDB Atlas.
-
-    Optional query parameters:
-      from: selected departure city
-      to: selected destination city
-    """
+    """Return available departure cities, destinations, and dates."""
 
     selected_from = request.args.get("from", "").strip()
     selected_to = request.args.get("to", "").strip()
 
     try:
-        # Only consider flights with seats still available.
         available_filter = {
-            "available_seats": {"$gt": 0}
+            "available_seats": {"$gt": 0},
+            "travel_date": {
+                "$gte": DEMO_START_DATE,
+                "$lte": DEMO_END_DATE
+            }
         }
 
-        departure_cities = flights_collection.distinct(
-            "source",
-            available_filter
-        )
-
-        destination_cities = flights_collection.distinct(
-            "destination",
-            available_filter
-        )
-
-        # Show only destinations served from the selected
-        # departure city.
+        departure_cities = []
+        destination_cities = []
         available_destinations = []
+        travel_dates = []
 
-        if selected_from:
+        # Initial page load: only departure cities are needed.
+        if not selected_from:
+            departure_cities = flights_collection.distinct(
+                "source", available_filter
+            )
+
+        # After choosing a departure city: load its destinations.
+        elif not selected_to:
             route_filter = {
                 **available_filter,
                 "source": {
@@ -148,37 +146,32 @@ def flight_options():
             }
 
             available_destinations = flights_collection.distinct(
-                "destination",
-                route_filter
+                "destination", route_filter
             )
 
-        # Show dates for the selected route, where provided.
-        date_filter = dict(available_filter)
-
-        if selected_from:
-            date_filter["source"] = {
-                "$regex": "^" + re.escape(selected_from) + "$",
-                "$options": "i"
+        # After choosing both cities: load dates for that route.
+        else:
+            date_filter = {
+                **available_filter,
+                "source": {
+                    "$regex": "^" + re.escape(selected_from) + "$",
+                    "$options": "i"
+                },
+                "destination": {
+                    "$regex": "^" + re.escape(selected_to) + "$",
+                    "$options": "i"
+                }
             }
 
-        if selected_to:
-            date_filter["destination"] = {
-                "$regex": "^" + re.escape(selected_to) + "$",
-                "$options": "i"
-            }
-
-        travel_dates = flights_collection.distinct(
-            "travel_date",
-            date_filter
-        )
+            travel_dates = flights_collection.distinct(
+                "travel_date", date_filter
+            )
 
         return jsonify({
             "status": "success",
             "departure_cities": sorted(departure_cities),
             "destination_cities": sorted(destination_cities),
-            "available_destinations": sorted(
-                available_destinations
-            ),
+            "available_destinations": sorted(available_destinations),
             "travel_dates": sorted(travel_dates)
         })
 
@@ -191,7 +184,6 @@ def flight_options():
             "status": "error",
             "message": "Unable to load flight options right now."
         }), 500
-
 
 # ========================================
 # SEARCH FLIGHTS
@@ -236,6 +228,12 @@ def search_flights():
         return jsonify({
             "status": "error",
             "message": "Please provide a valid calendar date."
+        }), 400
+
+    if not DEMO_START_DATE <= departure_date <= DEMO_END_DATE:
+        return jsonify({
+            "status": "error",
+            "message": "SkyBook demo flights are available only from November 1 to December 31, 2026."
         }), 400
 
     if from_city.casefold() == to_city.casefold():

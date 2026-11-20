@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const toInput = document.getElementById("to");
     const dateInput = document.getElementById("date");
     
-    // ------------------------------------
+      // ------------------------------------
     // DYNAMIC FLIGHT SEARCH DROPDOWNS
     // ------------------------------------
 
@@ -103,7 +103,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // When a departure city is selected, load its destinations.
+    // Load destinations for the selected departure city.
     fromInput.addEventListener("change", async function () {
         const from = fromInput.value;
 
@@ -116,8 +116,10 @@ document.addEventListener("DOMContentLoaded", function () {
         availableFlights = [];
         selectedFlight = null;
         resultsContainer.replaceChildren();
+
         flightCount.textContent =
             "Choose a route and date to search for flights.";
+
         bookingFormSection.hidden = true;
         showMessage(message, "");
 
@@ -129,11 +131,19 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
             const result = await fetchFlightOptions(from);
 
+            // IMPORTANT: Use destinations for this departure city.
             populateDropdown(
                 toInput,
-                result.destination_cities || [],
+                result.available_destinations || [],
                 "Select destination city"
             );
+
+            if (!result.available_destinations?.length) {
+                resetDropdown(
+                    toInput,
+                    "No destinations available"
+                );
+            }
 
         } catch (error) {
             console.error("Destination loading error:", error);
@@ -147,6 +157,61 @@ document.addEventListener("DOMContentLoaded", function () {
             );
         }
     });
+
+    // Load travel dates for the selected route.
+    toInput.addEventListener("change", async function () {
+        const from = fromInput.value;
+        const to = toInput.value;
+
+        resetDropdown(dateInput, "Loading travel dates...");
+        dateInput.disabled = true;
+
+        availableFlights = [];
+        selectedFlight = null;
+        resultsContainer.replaceChildren();
+
+        flightCount.textContent =
+            "Choose a travel date to search for flights.";
+
+        bookingFormSection.hidden = true;
+        showMessage(message, "");
+
+        if (!from || !to) {
+            resetDropdown(dateInput, "Select route first");
+            return;
+        }
+
+        try {
+            const result = await fetchFlightOptions(from, to);
+
+            populateDropdown(
+                dateInput,
+                result.travel_dates || [],
+                "Select travel date"
+            );
+
+            if (!result.travel_dates?.length) {
+                resetDropdown(
+                    dateInput,
+                    "No travel dates available"
+                );
+            }
+
+        } catch (error) {
+            console.error("Travel date loading error:", error);
+
+            resetDropdown(dateInput, "Could not load dates");
+            dateInput.disabled = true;
+
+            showMessage(
+                message,
+                "Unable to load travel dates. Please try again."
+            );
+        }
+    });
+
+    // Start loading the dropdowns.
+    loadDepartureCities();
 
     // When a destination is selected, load dates for that route.
     toInput.addEventListener("change", async function () {
@@ -171,6 +236,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         try {
             const result = await fetchFlightOptions(from, to);
+            console.log("Selected route:", from, "to", to);
+            console.log("Travel dates received:", result.travel_dates);
 
             populateDropdown(
                 dateInput,
